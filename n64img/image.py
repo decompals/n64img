@@ -22,12 +22,12 @@ class Image:
             self.width, self.height, self.data
         )
 
-    def get_writer(self):
+    def get_writer(self) -> png.Writer:
         return png.Writer(
             self.width, self.height, greyscale=self.greyscale, alpha=self.alpha
         )
 
-    def parse(self):
+    def parse(self) -> bytes:
         if not self.flip_h and not self.flip_v:
             return self.data
 
@@ -42,7 +42,8 @@ class Image:
 
     def write(self, outpath: Path):
         with open(outpath, "wb") as f:
-            self.get_writer().write(f, self.parse())
+            pixels = self.parse()
+            self.get_writer().write_array(f, pixels)
 
 
 class CI4(Image):
