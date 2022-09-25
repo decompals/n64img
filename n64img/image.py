@@ -16,6 +16,7 @@ class Image:
         self.alpha = False
         self.flip_h = False
         self.flip_v = False
+        self.palette = None
 
     def __str__(self):
         return "Image(width={}, height={}, data={})".format(
@@ -24,7 +25,11 @@ class Image:
 
     def get_writer(self) -> png.Writer:
         return png.Writer(
-            self.width, self.height, greyscale=self.greyscale, alpha=self.alpha
+            self.width,
+            self.height,
+            greyscale=self.greyscale,
+            alpha=self.alpha,
+            palette=self.palette,
         )
 
     def parse(self) -> bytes:
@@ -45,6 +50,9 @@ class Image:
             pixels = self.parse()
             self.get_writer().write_array(f, pixels)
 
+    def size(self) -> int:
+        return self.width * self.height
+
 
 class CI4(Image):
     def parse(self) -> bytes:
@@ -57,6 +65,9 @@ class CI4(Image):
             img.append(self.data[i] & 0xF)
 
         return bytes(img)
+
+    def size(self) -> int:
+        return self.width * self.height // 2
 
 
 class CI8(Image):
@@ -85,6 +96,9 @@ class I4(Image):
             img += bytes((i1, i2))
 
         return bytes(img)
+
+    def size(self) -> int:
+        return self.width * self.height // 2
 
 
 class I8(Image):
@@ -122,6 +136,9 @@ class IA4(Image):
 
         return bytes(img)
 
+    def size(self) -> int:
+        return self.width * self.height // 2
+
 
 class IA8(Image):
     def __init__(self, data, width, height):
@@ -154,6 +171,9 @@ class IA16(Image):
         self.greyscale = True
         self.alpha = True
 
+    def size(self) -> int:
+        return self.width * self.height * 2
+
 
 class RGBA16(Image):
     def __init__(self, data, width, height):
@@ -171,6 +191,15 @@ class RGBA16(Image):
 
         return bytes(img)
 
+    def size(self) -> int:
+        return self.width * self.height * 2
 
-class RGBA32(RGBA16):
-    pass
+
+class RGBA32(Image):
+    def __init__(self, data, width, height):
+        super().__init__(data, width, height)
+        self.greyscale = False
+        self.alpha = True
+
+    def size(self) -> int:
+        return self.width * self.height * 4
