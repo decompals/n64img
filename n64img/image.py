@@ -1,22 +1,25 @@
 from math import ceil
 from pathlib import Path
+from typing import List, Optional, Tuple
 
 import png
 
 from n64img import iter
 from n64img.color import unpack_color
 
+Palette = List[Tuple[int, int, int, int]]
+
 
 class Image:
-    def __init__(self, data, width, height):
-        self.data = data
-        self.width = width
-        self.height = height
-        self.greyscale = False
-        self.alpha = False
-        self.flip_h = False
-        self.flip_v = False
-        self.palette = None
+    def __init__(self, data: bytes, width: int, height: int):
+        self.data: bytes = data
+        self.width: int = width
+        self.height: int = height
+        self.greyscale: bool = False
+        self.alpha: bool = False
+        self.flip_h: bool = False
+        self.flip_v: bool = False
+        self.palette: Optional[Palette] = None
 
     def __str__(self):
         return "Image(width={}, height={}, data={})".format(
@@ -27,7 +30,7 @@ class Image:
         return png.Writer(
             self.width,
             self.height,
-            greyscale=self.greyscale,
+            greyscale=self.greyscale,  # type: ignore
             alpha=self.alpha,
             palette=self.palette,
         )

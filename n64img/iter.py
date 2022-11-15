@@ -8,7 +8,12 @@ def iter_in_groups(iterable, n, fillvalue=None):
 
 
 def iter_image_indexes(
-    width, height, bytes_per_x=1, bytes_per_y=1, flip_h=False, flip_v=False
+    width: int,
+    height: int,
+    bytes_per_x: float = 1,
+    bytes_per_y: float = 1,
+    flip_h: bool = False,
+    flip_v: bool = False,
 ):
     w = int(width * bytes_per_x)
     h = int(height * bytes_per_y)
