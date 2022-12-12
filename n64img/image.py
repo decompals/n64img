@@ -82,7 +82,6 @@ class I1(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
         self.greyscale = True
-        self.alpha = True
 
     def parse(self) -> bytes:
         img = bytearray()
@@ -101,7 +100,7 @@ class I1(Image):
                 # Convert active bits to RGB white and inactive to black.
                 p = ceil(0xFF * p)
 
-                img += bytes((p, 0xFF))
+                img.append(p)
 
         return bytes(img)
 
