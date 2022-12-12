@@ -106,16 +106,12 @@ class I1(Image):
                 if p == 0x0:
                     a = 0x0
 
-                # Set white pixels to black for easier visibility.
-                else:
-                    p = 0x0
-
                 img += bytes((p, a))
 
         return bytes(img)
 
     def size(self) -> int:
-        return self.width * self.height // 2
+        return self.width * self.height // 8
 
 class I4(Image):
     def __init__(self, data, width, height):
