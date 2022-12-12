@@ -77,7 +77,7 @@ class CI8(Image):
     pass
 
 # I1, a very primitive type where each bit represents one pixel.
-# Generally, only used for debug fonts and not rendered using the RDP.
+# Generally, only used for debug fonts and rendered using the cpu instead of the rdp.
 class I1(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
@@ -98,15 +98,10 @@ class I1(Image):
                 # Store the value of each bit as a pixel.
                 p = (b >> (j - 1)) & 0x1
 
-                # Convert active bits to RGB white and inactive to blank.
+                # Convert active bits to RGB white and inactive to black.
                 p = ceil(0xFF * p)
 
-                # Set transparency for blank pixels.
-                a = 0xFF
-                if p == 0x0:
-                    a = 0x0
-
-                img += bytes((p, a))
+                img += bytes((p, 0xFF))
 
         return bytes(img)
 
