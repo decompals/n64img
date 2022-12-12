@@ -76,31 +76,48 @@ class CI4(Image):
 class CI8(Image):
     pass
 
+# I1, a very primitive type where each bit represents one pixel.
+# Generally, only used for debug fonts and not rendered using the RSP.
 class I1(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
         self.greyscale = True
+        self.alpha = True
 
     def parse(self) -> bytes:
         img = bytearray()
 
+        for i in self.data:
+            print(hex(i), " ")
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, 1, self.flip_h, self.flip_v
+            self.width, self.height, 0.249, 1, self.flip_h, self.flip_v
         ):
+
             b = self.data[i]
 
-            i1 = (b >> 4) & 0xF
-            #i2 = b & 0xF
+            # iterate over bits
+            for j in range(8, 0, -1):
+                # Store the value of each bit as a pixel.
+                p = (b >> (j - 1)) & 0x1
 
-            i1 = ceil(0xFF * (i1 / 15))
-            #i2 = ceil(0xFF * (i2 / 15))
+                # Convert active bits to RGB white and inactive to blank.
+                p = ceil(0xFF * p)
 
-            img += bytes(i1)
+                # Set transparency for blank pixels.
+                a = 0xFF
+                if p == 0x0:
+                    a = 0x0
+
+                # Set white pixels to black for easier visibility.
+                else:
+                    p = 0x0
+
+                img += bytes((p, a))
 
         return bytes(img)
 
     def size(self) -> int:
-        return self.width * self.height // 8
+        return self.width * self.height // 2
 
 class I4(Image):
     def __init__(self, data, width, height):
