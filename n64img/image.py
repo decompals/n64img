@@ -77,7 +77,7 @@ class CI8(Image):
     pass
 
 # I1, a very primitive type where each bit represents one pixel.
-# Generally, only used for debug fonts and not rendered using the RSP.
+# Generally, only used for debug fonts and not rendered using the RDP.
 class I1(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
