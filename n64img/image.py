@@ -87,8 +87,6 @@ class I1(Image):
     def parse(self) -> bytes:
         img = bytearray()
 
-        for i in self.data:
-            print(hex(i), " ")
         for x, y, i in iter.iter_image_indexes(
             self.width, self.height, 0.249, 1, self.flip_h, self.flip_v
         ):
