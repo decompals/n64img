@@ -42,7 +42,7 @@ class Image:
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 1, 1, self.flip_h, self.flip_v
+            self.width, self.height, 1, self.flip_h, self.flip_v
         ):
             img.append(self.data[i])
 
@@ -62,7 +62,7 @@ class CI4(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, 1, self.flip_h, self.flip_v
+            self.width, self.height, 0.5, self.flip_h, self.flip_v
         ):
             img.append(self.data[i] >> 4)
             img.append(self.data[i] & 0xF)
@@ -76,6 +76,7 @@ class CI4(Image):
 class CI8(Image):
     pass
 
+
 # I1, a very primitive type where each bit represents one pixel.
 # Generally, only used for debug fonts and rendered using the cpu instead of the rdp.
 class I1(Image):
@@ -84,14 +85,14 @@ class I1(Image):
         self.greyscale = True
 
     def parse(self) -> bytes:
+        if self.flip_h:
+            raise Exception("I1 images cannot be flipped horizontally.")
+        if self.flip_v:
+            raise Exception("I1 images cannot be flipped vertically.")
+
         img = bytearray()
 
-        for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.125, 1, self.flip_h, self.flip_v
-        ):
-
-            b = self.data[i]
-
+        for b in self.data:
             # iterate over bits
             for j in range(8, 0, -1):
                 # Store the value of each bit as a pixel.
@@ -107,6 +108,7 @@ class I1(Image):
     def size(self) -> int:
         return self.width * self.height // 8
 
+
 class I4(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
@@ -116,7 +118,7 @@ class I4(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, 1, self.flip_h, self.flip_v
+            self.width, self.height, 0.5, self.flip_h, self.flip_v
         ):
             b = self.data[i]
 
@@ -150,7 +152,7 @@ class IA4(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, 1, flip_h=self.flip_h, flip_v=self.flip_v
+            self.width, self.height, 0.5, flip_h=self.flip_h, flip_v=self.flip_v
         ):
             b = self.data[i]
 
@@ -218,7 +220,7 @@ class RGBA16(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 2, 1, self.flip_h, self.flip_v
+            self.width, self.height, 2, self.flip_h, self.flip_v
         ):
             img += bytes(unpack_color(self.data[i:]))
 

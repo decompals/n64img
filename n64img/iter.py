@@ -10,24 +10,19 @@ def iter_in_groups(iterable, n, fillvalue=None):
 def iter_image_indexes(
     width: int,
     height: int,
-    bytes_per_x: float = 1,
-    bytes_per_y: float = 1,
+    bytes_per_pixel: float = 1,
     flip_h: bool = False,
     flip_v: bool = False,
 ):
-    w = int(width * bytes_per_x)
-    h = int(height * bytes_per_y)
+    w = int(width * bytes_per_pixel)
+    h = int(height * 1)
 
     xrange = (
-        range(w - ceil(bytes_per_x), -1, -ceil(bytes_per_x))
+        range(w - ceil(bytes_per_pixel), -1, -ceil(bytes_per_pixel))
         if flip_h
-        else range(0, w, ceil(bytes_per_x))
+        else range(0, w, ceil(bytes_per_pixel))
     )
-    yrange = (
-        range(h - ceil(bytes_per_y), -1, -ceil(bytes_per_y))
-        if flip_v
-        else range(0, h, ceil(bytes_per_y))
-    )
+    yrange = range(h - 1, -1, -1) if flip_v else range(0, h, 1)
 
     for y in yrange:
         for x in xrange:
