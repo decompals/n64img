@@ -70,7 +70,7 @@ class CI4(Image):
         return bytes(img)
 
     def size(self) -> int:
-        return self.width * self.height // 2
+        return ceil(self.width * self.height / 2)
 
 
 class CI8(Image):
@@ -106,7 +106,7 @@ class I1(Image):
         return bytes(img)
 
     def size(self) -> int:
-        return self.width * self.height // 8
+        return ceil(self.width * self.height / 8)
 
 
 class I4(Image):
@@ -133,7 +133,7 @@ class I4(Image):
         return bytes(img)
 
     def size(self) -> int:
-        return self.width * self.height // 2
+        return ceil(self.width * self.height / 2)
 
 
 class I8(Image):
@@ -172,7 +172,7 @@ class IA4(Image):
         return bytes(img)
 
     def size(self) -> int:
-        return self.width * self.height // 2
+        return ceil(self.width * self.height / 2)
 
 
 class IA8(Image):
