@@ -19,6 +19,8 @@ jobs:
         pip install mypy
     - name: mypy
       run: mypy --show-column-numbers --hide-error-context .
+    - name: Unit Tests
+      run: python3 -m unittest
 
   build_wheel:
     name: Build wheel
