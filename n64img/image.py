@@ -19,6 +19,7 @@ class Image:
         self.alpha: bool = False
         self.flip_h: bool = False
         self.flip_v: bool = False
+        self.little_endian: bool = False
         self.palette: Optional[Palette] = None
 
     def __str__(self):
@@ -78,11 +79,18 @@ class CI4(Image):
     def parse(self) -> bytes:
         img = bytearray()
 
-        for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, self.depth, self.flip_h, self.flip_v
-        ):
-            img.append(self.data[i] >> 4)
-            img.append(self.data[i] & 0xF)
+        if self.little_endian:
+            for x, y, i in iter.iter_image_indexes(
+                self.width, self.height, self.depth, self.flip_h, self.flip_v
+            ):
+                img.append(self.data[i] & 0xF)
+                img.append(self.data[i] >> 4)
+        else:
+            for x, y, i in iter.iter_image_indexes(
+                self.width, self.height, self.depth, self.flip_h, self.flip_v
+            ):
+                img.append(self.data[i] >> 4)
+                img.append(self.data[i] & 0xF)
 
         return bytes(img)
 
@@ -129,18 +137,32 @@ class I4(Image):
     def parse(self) -> bytes:
         img = bytearray()
 
-        for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, self.depth, self.flip_h, self.flip_v
-        ):
-            b = self.data[i]
+        if self.little_endian:
+            for x, y, i in iter.iter_image_indexes(
+                self.width, self.height, self.depth, self.flip_h, self.flip_v
+            ):
+                b = self.data[i]
 
-            i1 = (b >> 4) & 0xF
-            i2 = b & 0xF
+                i1 = b & 0xF
+                i2 = (b >> 4) & 0xF
 
-            i1 = (i1 << 4) | i1
-            i2 = (i2 << 4) | i2
+                i1 = (i1 << 4) | i1
+                i2 = (i2 << 4) | i2
 
-            img += bytes((i1, i2))
+                img += bytes((i1, i2))
+        else:
+            for x, y, i in iter.iter_image_indexes(
+                self.width, self.height, self.depth, self.flip_h, self.flip_v
+            ):
+                b = self.data[i]
+
+                i1 = (b >> 4) & 0xF
+                i2 = b & 0xF
+
+                i1 = (i1 << 4) | i1
+                i2 = (i2 << 4) | i2
+
+                img += bytes((i1, i2))
 
         return bytes(img)
 
@@ -166,8 +188,12 @@ class IA4(Image):
         ):
             b = self.data[i]
 
-            h = (b >> 4) & 0xF
-            l = b & 0xF
+            if self.little_endian:
+                h = b & 0xF
+                l = (b >> 4) & 0xF
+            else:
+                h = (b >> 4) & 0xF
+                l = b & 0xF
 
             i1 = h & 0xE
             i1 = (i1 << 4) | (i1 << 1) | (i1 >> 2)
