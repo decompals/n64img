@@ -14,6 +14,7 @@ class Image:
         self.data: bytes = data
         self.width: int = width
         self.height: int = height
+        self.depth: int = 1
         self.greyscale: bool = False
         self.alpha: bool = False
         self.flip_h: bool = False
@@ -52,24 +53,38 @@ class Image:
             pixels = self.parse()
             self.get_writer().write_array(f, pixels)
 
+    def mipmap_size(self) -> int:
+        size = 0
+        width = self.width
+        while width > 0:
+            # NOTE: rows must be padded to 8-byte boundary
+            row = height = width
+            remainder = ceil(width * self.depth) % 8
+            if remainder != 0:
+                row += ceil((8 - remainder) / self.depth)
+            size += row * height * self.depth
+            width >>= 1
+        return size
+
     def size(self) -> int:
-        return self.width * self.height
+        return ceil(self.width * self.height * self.depth)
 
 
 class CI4(Image):
+    def __init__(self, data, width, height):
+        super().__init__(data, width, height)
+        self.depth = 0.5
+
     def parse(self) -> bytes:
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, self.flip_h, self.flip_v
+            self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
             img.append(self.data[i] >> 4)
             img.append(self.data[i] & 0xF)
 
         return bytes(img)
-
-    def size(self) -> int:
-        return ceil(self.width * self.height / 2)
 
 
 class CI8(Image):
@@ -81,6 +96,7 @@ class CI8(Image):
 class I1(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
+        self.depth = 0.125
         self.greyscale = True
 
     def parse(self) -> bytes:
@@ -96,7 +112,6 @@ class I1(Image):
             for j in range(8, 0, -1):
                 # Store the value of each bit as a pixel.
                 p = (b >> (j - 1)) & 0x1
-
                 # Convert active bits to RGB white and inactive to black.
                 p *= 0xFF
 
@@ -104,20 +119,18 @@ class I1(Image):
 
         return bytes(img)
 
-    def size(self) -> int:
-        return ceil(self.width * self.height / 8)
-
 
 class I4(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
+        self.depth = 0.5
         self.greyscale = True
 
     def parse(self) -> bytes:
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, self.flip_h, self.flip_v
+            self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
             b = self.data[i]
 
@@ -131,9 +144,6 @@ class I4(Image):
 
         return bytes(img)
 
-    def size(self) -> int:
-        return ceil(self.width * self.height / 2)
-
 
 class I8(Image):
     def __init__(self, data, width, height):
@@ -144,6 +154,7 @@ class I8(Image):
 class IA4(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
+        self.depth = 0.5
         self.greyscale = True
         self.alpha = True
 
@@ -151,7 +162,7 @@ class IA4(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 0.5, flip_h=self.flip_h, flip_v=self.flip_v
+            self.width, self.height, self.depth, flip_h=self.flip_h, flip_v=self.flip_v
         ):
             b = self.data[i]
 
@@ -169,9 +180,6 @@ class IA4(Image):
             img += bytes((i1, a1, i2, a2))
 
         return bytes(img)
-
-    def size(self) -> int:
-        return ceil(self.width * self.height / 2)
 
 
 class IA8(Image):
@@ -202,16 +210,15 @@ class IA8(Image):
 class IA16(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
+        self.depth = 2
         self.greyscale = True
         self.alpha = True
-
-    def size(self) -> int:
-        return self.width * self.height * 2
 
 
 class RGBA16(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
+        self.depth = 2
         self.greyscale = False
         self.alpha = True
 
@@ -219,7 +226,7 @@ class RGBA16(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 2, self.flip_h, self.flip_v
+            self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
             s = int.from_bytes(self.data[i:i+2], byteorder='big')
 
@@ -237,15 +244,10 @@ class RGBA16(Image):
 
         return bytes(img)
 
-    def size(self) -> int:
-        return self.width * self.height * 2
-
 
 class RGBA32(Image):
     def __init__(self, data, width, height):
         super().__init__(data, width, height)
+        self.depth = 4
         self.greyscale = False
         self.alpha = True
-
-    def size(self) -> int:
-        return self.width * self.height * 4
