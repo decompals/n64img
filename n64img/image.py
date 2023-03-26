@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple
 import png
 
 from n64img import iter
+from n64img.color import unpack_color
 
 Palette = List[Tuple[int, int, int, int]]
 
@@ -113,7 +114,7 @@ class I1(Image):
                 # Store the value of each bit as a pixel.
                 p = (b >> (j - 1)) & 0x1
                 # Convert active bits to RGB white and inactive to black.
-                p *= 0xFF
+                p = ceil(0xFF * p)
 
                 img.append(p)
 
@@ -137,8 +138,8 @@ class I4(Image):
             i1 = (b >> 4) & 0xF
             i2 = b & 0xF
 
-            i1 = (i1 << 4) | i1
-            i2 = (i2 << 4) | i2
+            i1 = ceil(0xFF * (i1 / 15))
+            i2 = ceil(0xFF * (i2 / 15))
 
             img += bytes((i1, i2))
 
@@ -169,13 +170,13 @@ class IA4(Image):
             h = (b >> 4) & 0xF
             l = b & 0xF
 
-            i1 = h & 0xE
-            i1 = (i1 << 4) | (i1 << 1) | (i1 >> 2)
+            i1 = (h >> 1) & 0xF
             a1 = (h & 1) * 0xFF
+            i1 = ceil(0xFF * (i1 / 7))
 
-            i2 = l & 0xE
-            i2 = (i2 << 4) | (i2 << 1) | (i2 >> 2)
+            i2 = (l >> 1) & 0xF
             a2 = (l & 1) * 0xFF
+            i2 = ceil(0xFF * (i2 / 7))
 
             img += bytes((i1, a1, i2, a2))
 
@@ -199,8 +200,8 @@ class IA8(Image):
             i = (b >> 4) & 0xF
             a = b & 0xF
 
-            i = (i << 4) | i
-            a = (a << 4) | a
+            i = ceil(0xFF * (i / 15))
+            a = ceil(0xFF * (a / 15))
 
             img += bytes((i, a))
 
@@ -228,19 +229,7 @@ class RGBA16(Image):
         for x, y, i in iter.iter_image_indexes(
             self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
-            s = int.from_bytes(self.data[i:i+2], byteorder='big')
-
-            r = (s >> 11) & 0x1F
-            g = (s >>  6) & 0x1F
-            b = (s >>  1) & 0x1F
-
-            r = (r << 3) | (r >> 2)
-            g = (g << 3) | (g >> 2)
-            b = (b << 3) | (b >> 2)
-
-            a = 255 * (s & 1)
-
-            img += bytes((r,g,b,a))
+            img += bytes(unpack_color(self.data[i:]))
 
         return bytes(img)
 
