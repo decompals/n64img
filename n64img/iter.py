@@ -3,7 +3,7 @@ from math import ceil
 from typing import Iterable, Tuple
 
 
-WORD_SIZE = 4  # bytes
+BYTES_PER_WORD: int = 4
 
 
 def iter_image_indexes(
@@ -17,14 +17,13 @@ def iter_image_indexes(
     w = int(width * bytes_per_pixel)
     h = int(height * 1)
 
-    xrange = (
+    xrange = list(
         range(w - ceil(bytes_per_pixel), -1, -ceil(bytes_per_pixel))
         if flip_h
         else range(0, w, ceil(bytes_per_pixel))
     )
 
     if swap_words:
-        xrange = list(xrange)
         xrange_swapped = []
         pixels_per_word = ceil(WORD_SIZE / bytes_per_pixel)
         for i in range(0, len(xrange), pixels_per_word * 2):
