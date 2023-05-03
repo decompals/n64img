@@ -1,9 +1,10 @@
 {
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "files.eol": "\n",
     "files.insertFinalNewline": true,
     "[python]": {
         "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
     },
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
