@@ -1,6 +1,6 @@
 from math import ceil
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 import png
 
@@ -14,7 +14,7 @@ class Image:
         self.data: bytes = data
         self.width: int = width
         self.height: int = height
-        self.depth: int = 1
+        self.depth: float = 1
         self.greyscale: bool = False
         self.alpha: bool = False
         self.flip_h: bool = False
@@ -27,11 +27,35 @@ class Image:
             self.width, self.height, self.data
         )
 
+    def set_palette(
+        self, palette_bytes: bytes, endian: Literal["little", "big"] = "big"
+    ) -> None:
+        def unpack_color(data):
+            s = int.from_bytes(data[0:2], endian)
+
+            r = (s >> 11) & 0x1F
+            g = (s >> 6) & 0x1F
+            b = (s >> 1) & 0x1F
+            a = (s & 1) * 0xFF
+
+            r = ceil(0xFF * (r / 31))
+            g = ceil(0xFF * (g / 31))
+            b = ceil(0xFF * (b / 31))
+
+            return r, g, b, a
+
+        palette = []
+
+        for a, b in iter.iter_in_groups(palette_bytes, 2):
+            palette.append(unpack_color([a, b]))
+
+        self.palette = palette
+
     def get_writer(self) -> png.Writer:
         return png.Writer(
             self.width,
             self.height,
-            greyscale=self.greyscale,  # type: ignore
+            greyscale=self.greyscale,
             alpha=self.alpha,
             palette=self.palette,
         )
@@ -63,7 +87,7 @@ class Image:
             remainder = ceil(width * self.depth) % 8
             if remainder != 0:
                 row += ceil((8 - remainder) / self.depth)
-            size += row * height * self.depth
+            size += int(row * height * self.depth)
             width >>= 1
         return size
 
@@ -254,11 +278,11 @@ class RGBA16(Image):
         for x, y, i in iter.iter_image_indexes(
             self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
-            s = int.from_bytes(self.data[i:i+2], byteorder='big')
+            s = int.from_bytes(self.data[i : i + 2], byteorder="big")
 
             r = (s >> 11) & 0x1F
-            g = (s >>  6) & 0x1F
-            b = (s >>  1) & 0x1F
+            g = (s >> 6) & 0x1F
+            b = (s >> 1) & 0x1F
 
             r = (r << 3) | (r >> 2)
             g = (g << 3) | (g >> 2)
@@ -266,7 +290,7 @@ class RGBA16(Image):
 
             a = 255 * (s & 1)
 
-            img += bytes((r,g,b,a))
+            img += bytes((r, g, b, a))
 
         return bytes(img)
 
