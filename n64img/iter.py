@@ -1,10 +1,6 @@
 from itertools import zip_longest
 from math import ceil
-
-
-def iter_in_groups(iterable, n, fillvalue=None):
-    args = [iter(iterable)] * n
-    return zip_longest(*args, fillvalue=fillvalue)
+from typing import Iterable, Tuple
 
 
 def iter_image_indexes(
@@ -13,7 +9,7 @@ def iter_image_indexes(
     bytes_per_pixel: float = 1,
     flip_h: bool = False,
     flip_v: bool = False,
-):
+) -> Iterable[Tuple[int, int, int]]:
     w = int(width * bytes_per_pixel)
     h = int(height * 1)
 

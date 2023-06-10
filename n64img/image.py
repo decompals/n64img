@@ -10,7 +10,7 @@ Palette = List[Tuple[int, int, int, int]]
 
 
 class Image:
-    def __init__(self, data: bytes, width: int, height: int):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         self.data: bytes = data
         self.width: int = width
         self.height: int = height
@@ -22,16 +22,16 @@ class Image:
         self.little_endian: bool = False
         self.palette: Optional[Palette] = None
 
-    def __str__(self):
-        return "Image(width={}, height={}, data={})".format(
+    def __str__(self) -> str:
+        return "Image(width={}, height={}, data={!r})".format(
             self.width, self.height, self.data
         )
 
     def set_palette(
         self, palette_bytes: bytes, endian: Literal["little", "big"] = "big"
     ) -> None:
-        def unpack_color(data):
-            s = int.from_bytes(data[0:2], endian)
+        def unpack_color(data: bytes) -> Tuple[int, int, int, int]:
+            s = int.from_bytes(data, endian)
 
             r = (s >> 11) & 0x1F
             g = (s >> 6) & 0x1F
@@ -46,8 +46,9 @@ class Image:
 
         palette = []
 
-        for a, b in iter.iter_in_groups(palette_bytes, 2):
-            palette.append(unpack_color([a, b]))
+        assert len(palette_bytes) % 2 == 0
+        for i in range(0, len(palette_bytes), 2):
+            palette.append(unpack_color(palette_bytes[i : i + 2]))
 
         self.palette = palette
 
@@ -73,7 +74,7 @@ class Image:
 
         return bytes(img)
 
-    def write(self, outpath: Path):
+    def write(self, outpath: Path) -> None:
         with open(outpath, "wb") as f:
             pixels = self.parse()
             self.get_writer().write_array(f, pixels)
@@ -96,7 +97,7 @@ class Image:
 
 
 class CI4(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 0.5
 
@@ -126,7 +127,7 @@ class CI8(Image):
 # I1, a very primitive type where each bit represents one pixel.
 # Generally, only used for debug fonts and rendered using the cpu instead of the rdp.
 class I1(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 0.125
         self.greyscale = True
@@ -153,7 +154,7 @@ class I1(Image):
 
 
 class I4(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 0.5
         self.greyscale = True
@@ -192,13 +193,13 @@ class I4(Image):
 
 
 class I8(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.greyscale = True
 
 
 class IA4(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 0.5
         self.greyscale = True
@@ -233,7 +234,7 @@ class IA4(Image):
 
 
 class IA8(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.greyscale = True
         self.alpha = True
@@ -258,7 +259,7 @@ class IA8(Image):
 
 
 class IA16(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 2
         self.greyscale = True
@@ -266,7 +267,7 @@ class IA16(Image):
 
 
 class RGBA16(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 2
         self.greyscale = False
@@ -296,7 +297,7 @@ class RGBA16(Image):
 
 
 class RGBA32(Image):
-    def __init__(self, data, width, height):
+    def __init__(self, data: bytes, width: int, height: int) -> None:
         super().__init__(data, width, height)
         self.depth = 4
         self.greyscale = False
