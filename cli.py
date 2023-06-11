@@ -5,28 +5,27 @@ from typing import Optional
 
 from n64img.image import CI4, CI8, I4, I8, IA16, IA4, IA8, RGBA16, RGBA32, Image
 
-SUPPORTED_FORMATS = [
-    "ci4",
-    "ci8",
-    "i4",
-    "i8",
-    "ia4",
-    "ia8",
-    "ia16",
-    "rgba16",
-    "rgba32",
-]
 
-parser = argparse.ArgumentParser(description="Create PNGs from data")
-parser.add_argument("in_file")
-parser.add_argument("out_file")
-parser.add_argument("format", choices=SUPPORTED_FORMATS)
-parser.add_argument("width", type=int)
-parser.add_argument("height", type=int)
-parser.add_argument("--palette")
+def main() -> None:
+    SUPPORTED_FORMATS = [
+        "ci4",
+        "ci8",
+        "i4",
+        "i8",
+        "ia4",
+        "ia8",
+        "ia16",
+        "rgba16",
+        "rgba32",
+    ]
 
-
-if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create PNGs from data")
+    parser.add_argument("in_file")
+    parser.add_argument("out_file")
+    parser.add_argument("format", choices=SUPPORTED_FORMATS)
+    parser.add_argument("width", type=int)
+    parser.add_argument("height", type=int)
+    parser.add_argument("--palette")
     args = parser.parse_args()
 
     with open(args.in_file, "rb") as f:
@@ -63,3 +62,7 @@ if __name__ == "__main__":
         img.set_palette(palette_data)
 
     img.write(args.out_file)
+
+
+if __name__ == "__main__":
+    main()
