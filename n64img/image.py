@@ -274,7 +274,7 @@ class IA16(Image):
         for x, y, i in iter.iter_image_indexes(
             self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
-            img += bytes((self.data[i + 1], self.data[i]))
+            img += bytes((self.data[i], self.data[i + 1]))
 
         return bytes(img)
 
