@@ -68,7 +68,7 @@ class Image:
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, 1, self.flip_h, self.flip_v
+            self.width, self.height, self.depth, self.flip_h, self.flip_v
         ):
             img.append(self.data[i])
 
@@ -265,6 +265,19 @@ class IA16(Image):
         self.greyscale = True
         self.alpha = True
 
+    def parse(self) -> bytes:
+        if not self.flip_h and not self.flip_v:
+            return self.data
+
+        img = bytearray()
+
+        for x, y, i in iter.iter_image_indexes(
+            self.width, self.height, self.depth, self.flip_h, self.flip_v
+        ):
+            img += bytes((self.data[i + 1], self.data[i]))
+
+        return bytes(img)
+
 
 class RGBA16(Image):
     def __init__(self, data: bytes, width: int, height: int) -> None:
@@ -302,3 +315,18 @@ class RGBA32(Image):
         self.depth = 4
         self.greyscale = False
         self.alpha = True
+
+    def parse(self) -> bytes:
+        if not self.flip_h and not self.flip_v:
+            return self.data
+
+        img = bytearray()
+
+        for x, y, i in iter.iter_image_indexes(
+            self.width, self.height, self.depth, self.flip_h, self.flip_v
+        ):
+            img += bytes(
+                (self.data[i], self.data[i + 1], self.data[i + 2], self.data[i + 3])
+            )
+
+        return bytes(img)

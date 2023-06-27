@@ -1,3 +1,7 @@
 __pycache__/
 *.bin
 *.png
+
+build/
+dist/
+n64img.egg-info/
