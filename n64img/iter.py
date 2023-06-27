@@ -25,7 +25,7 @@ def iter_image_indexes(
 
     if swap_words:
         xrange_swapped = []
-        pixels_per_word = ceil(WORD_SIZE / bytes_per_pixel)
+        pixels_per_word = ceil(BYTES_PER_WORD / bytes_per_pixel)
         for i in range(0, len(xrange), pixels_per_word * 2):
             xrange_swapped += [
                 *xrange[i + pixels_per_word : i + pixels_per_word + pixels_per_word],
