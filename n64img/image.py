@@ -20,6 +20,7 @@ class Image:
         self.flip_h: bool = False
         self.flip_v: bool = False
         self.little_endian: bool = False
+        self.swap_words: bool = False
         self.palette: Optional[Palette] = None
 
     def __str__(self) -> str:
@@ -62,13 +63,18 @@ class Image:
         )
 
     def parse(self) -> bytes:
-        if not self.flip_h and not self.flip_v:
+        if not self.flip_h and not self.flip_v and not self.swap_words:
             return self.data
 
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, self.depth, self.flip_h, self.flip_v
+            self.width,
+            self.height,
+            bytes_per_pixel=self.depth,
+            flip_h=self.flip_h,
+            flip_v=self.flip_v,
+            swap_words=self.swap_words,
         ):
             img.append(self.data[i])
 
@@ -106,13 +112,23 @@ class CI4(Image):
 
         if self.little_endian:
             for x, y, i in iter.iter_image_indexes(
-                self.width, self.height, self.depth, self.flip_h, self.flip_v
+                self.width,
+                self.height,
+                bytes_per_pixel=self.depth,
+                flip_h=self.flip_h,
+                flip_v=self.flip_v,
+                swap_words=self.swap_words,
             ):
                 img.append(self.data[i] & 0xF)
                 img.append(self.data[i] >> 4)
         else:
             for x, y, i in iter.iter_image_indexes(
-                self.width, self.height, self.depth, self.flip_h, self.flip_v
+                self.width,
+                self.height,
+                bytes_per_pixel=self.depth,
+                flip_h=self.flip_h,
+                flip_v=self.flip_v,
+                swap_words=self.swap_words,
             ):
                 img.append(self.data[i] >> 4)
                 img.append(self.data[i] & 0xF)
@@ -164,7 +180,12 @@ class I4(Image):
 
         if self.little_endian:
             for x, y, i in iter.iter_image_indexes(
-                self.width, self.height, self.depth, self.flip_h, self.flip_v
+                self.width,
+                self.height,
+                bytes_per_pixel=self.depth,
+                flip_h=self.flip_h,
+                flip_v=self.flip_v,
+                swap_words=self.swap_words,
             ):
                 b = self.data[i]
 
@@ -177,7 +198,12 @@ class I4(Image):
                 img += bytes((i1, i2))
         else:
             for x, y, i in iter.iter_image_indexes(
-                self.width, self.height, self.depth, self.flip_h, self.flip_v
+                self.width,
+                self.height,
+                bytes_per_pixel=self.depth,
+                flip_h=self.flip_h,
+                flip_v=self.flip_v,
+                swap_words=self.swap_words,
             ):
                 b = self.data[i]
 
@@ -209,7 +235,12 @@ class IA4(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, self.depth, flip_h=self.flip_h, flip_v=self.flip_v
+            self.width,
+            self.height,
+            bytes_per_pixel=self.depth,
+            flip_h=self.flip_h,
+            flip_v=self.flip_v,
+            swap_words=self.swap_words,
         ):
             b = self.data[i]
 
@@ -243,7 +274,11 @@ class IA8(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, flip_h=self.flip_h, flip_v=self.flip_v
+            self.width,
+            self.height,
+            flip_h=self.flip_h,
+            flip_v=self.flip_v,
+            swap_words=self.swap_words,
         ):
             b = self.data[i]
 
@@ -290,7 +325,12 @@ class RGBA16(Image):
         img = bytearray()
 
         for x, y, i in iter.iter_image_indexes(
-            self.width, self.height, self.depth, self.flip_h, self.flip_v
+            self.width,
+            self.height,
+            bytes_per_pixel=self.depth,
+            flip_h=self.flip_h,
+            flip_v=self.flip_v,
+            swap_words=self.swap_words,
         ):
             s = int.from_bytes(self.data[i : i + 2], byteorder="big")
 
